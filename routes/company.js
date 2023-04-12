@@ -1,10 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const multer = require("multer");
 const { v4: uuidv4 } = require("uuid");
-const { uploadToS3, deleteObjectToS3} = require("../s3");
-const { putItem, scanTable } = require("../dynamodb");
-const upload = multer();
+const { putItem} = require("../dynamodb");
 
 router.post("/signIn", (req, res) => {
   console.log("Applicant Company");

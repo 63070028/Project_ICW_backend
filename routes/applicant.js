@@ -1,52 +1,61 @@
 const express = require("express");
 const router = express.Router();
+
 const multer = require("multer");
-const { v4: uuidv4 } = require("uuid");
-const { uploadToS3, deleteObjectToS3} = require("../s3");
-const { putItem, scanTable } = require("../dynamodb");
 const upload = multer();
 
-const { promisify } = require("util");
+const { v4: uuidv4 } = require("uuid");
+const { uploadToS3, deleteObjectToS3 } = require("../s3");
+const { putItem, scanTable } = require("../dynamodb");
 const jwt = require("jsonwebtoken");
+const isAuthen = require("../middleware/isAuthen")
 
 router.post("/signIn", async (req, res) => {
   console.log(req.body);
 
   //ตรวจข้อมูลใน database
-  const params = { TableName: "applicant" };
-
   try {
-    const items = await scanTable(params);
+    const items = await scanTable({ TableName: "applicant" });
     const user = items.find((item) => item.email.S === req.body.email);
 
     if (!user) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    const token = jwt.sign(
-      { user: { id: user.id.S, email: user.email.S } },
-      `${process.env.secretKey}`
-    );
+    if (!(user.password.S === req.body.password)) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
 
-    const token_prams = {
-      TableName: "token",
-      Item: {
-        id: { S: uuidv4() },
-        applicant_id: { S: user.id.S },
-        token: { S: token }, 
-      },
-    };
 
-    putItem(token_prams);
+    const tokens = await scanTable({ TableName: "authen" });
+    let token = tokens.find((token) => token.user_id.S === user.id.S);
+    
 
-    res.json({ token });
+    console.log(token)
+    if (!token) {
+      //// Generate and save token into database
+      token = jwt.sign({user: { id: user.id.S} },`${process.env.secretKey}`, {expiresIn: "2h"});
+      const token_prams = {
+        TableName: "authen",
+        Item: {
+          id: { S: uuidv4() },
+          user_id: { S: user.id.S },
+          token: { S: token },
+        },
+      };
+      await putItem(token_prams);
+      res.json({ token: token, user_id: user.id.S, user_role: "applicant" });
+    }
+    else{
+      res.json({ token: token.token.S, user_id: user.id.S, user_role: "applicant" });
+    }
+
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
   }
-
-  //res applicant_info
 });
+
 
 router.post("/signUp", async (req, res) => {
   //database
@@ -73,9 +82,9 @@ router.post("/signUp", async (req, res) => {
   };
 
   try {
-     await putItem(params);
+    await putItem(params);
     res.status(201).json({
-      message: "signUp successfully", 
+      message: "signUp successfully",
     });
   } catch (error) {
     console.error(error);
@@ -103,7 +112,7 @@ router.post("/profile/edit", (req, res) => {
 // });
 // const upload = multer({ storage: storage });
 
-router.post("/resume/upload", upload.single("file"), async (req, res) => {
+router.post("/resume/upload", isAuthen, upload.single("file"), async (req, res) => {
   console.log("Applicant Resume Upload " + req.body.user_id);
   const file = req.file;
   if (!file) {

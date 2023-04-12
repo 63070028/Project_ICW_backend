@@ -1,24 +1,26 @@
-const express = require('express')
-require('dotenv').config(); //ใข้งาน .env
-const app = express()
-const cors = require('cors')
+const express = require("express");
+require("dotenv").config(); //ใข้งาน .env
+const app = express();
+const cors = require("cors");
 
-app.use(cors())
-app.use(express.urlencoded({ extended: true }))
-app.use(express.json())
+app.use(cors());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
 //middleware
-const logger = require('./middleware/logger');
+const logger = require("./middleware/logger");
+const isAuthen = require("./middleware/isAuthen")
 
 app.use(logger);
 
-app.use('/applicant', require('./routes/applicant'))
-app.use('/company', require('./routes/company'))
+app.use("/applicant", require("./routes/applicant"));
+app.use("/company", require("./routes/company"));
 
-
-
+app.post("/welcome", isAuthen, (req, res) => {
+  res.status(200).send("Welcome 🙌 ");
+});
 
 const port = `${process.env.PORT}`;
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
-})
+  console.log(`Example app listening on port ${port}`);
+});
