@@ -7,6 +7,10 @@ app.use(cors())
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 
+//middleware
+const logger = require('./middleware/logger');
+
+app.use(logger);
 
 app.use('/applicant', require('./routes/applicant'))
 app.use('/company', require('./routes/company'))

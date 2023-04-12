@@ -1,4 +1,3 @@
-const url = require('url');
 const AWS = require("aws-sdk");
 const s3 = new AWS.S3({
   region: "us-east-1",
@@ -51,4 +50,4 @@ const deleteObjectToS3 = async function (bucketName, s3ObjectUrl) {
 };
 
 // Export the upload function
-module.exports = { uploadToS3, deleteObjectToS3};
+module.exports = { uploadToS3, deleteObjectToS3 };

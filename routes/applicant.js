@@ -2,24 +2,85 @@ const express = require("express");
 const router = express.Router();
 const multer = require("multer");
 const { v4: uuidv4 } = require("uuid");
-const { uploadToS3, deleteObjectToS3 } = require("../s3config");
-
+const { uploadToS3, deleteObjectToS3} = require("../s3");
+const { putItem, scanTable } = require("../dynamodb");
 const upload = multer();
 
-router.post("/signIn", (req, res) => {
-  console.log("Applicant SignIn");
+const { promisify } = require("util");
+const jwt = require("jsonwebtoken");
+
+router.post("/signIn", async (req, res) => {
   console.log(req.body);
 
   //ตรวจข้อมูลใน database
+  const params = { TableName: "applicant" };
+
+  try {
+    const items = await scanTable(params);
+    const user = items.find((item) => item.email.S === req.body.email);
+
+    if (!user) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    const token = jwt.sign(
+      { user: { id: user.id.S, email: user.email.S } },
+      `${process.env.secretKey}`
+    );
+
+    const token_prams = {
+      TableName: "token",
+      Item: {
+        id: { S: uuidv4() },
+        applicant_id: { S: user.id.S },
+        token: { S: token }, 
+      },
+    };
+
+    putItem(token_prams);
+
+    res.json({ token });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
 
   //res applicant_info
 });
 
-router.post("/signUp", (req, res) => {
-  console.log("Applicant SignUp");
+router.post("/signUp", async (req, res) => {
+  //database
   console.log(req.body);
 
-  //database
+  const params = {
+    TableName: "applicant",
+    Item: {
+      id: { S: uuidv4() }, // String type
+      email: { S: req.body.email },
+      password: { S: req.body.password },
+      firstName: { S: req.body.firstName },
+      lastName: { S: req.body.lastName },
+      email_profile: { S: req.body.email_profile },
+      birthDate: { S: req.body.birthDate },
+      gender: { S: req.body.gender },
+      address: { S: req.body.address },
+      phone: { S: req.body.phone },
+      resume: { S: req.body.resume },
+      transcript: { S: req.body.transcript },
+      portfolio: { S: req.body.portfolio },
+      state: { S: req.body.state },
+    },
+  };
+
+  try {
+     await putItem(params);
+    res.status(201).json({
+      message: "signUp successfully", 
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send(error.message);
+  }
 });
 
 router.post("/profile/edit", (req, res) => {
