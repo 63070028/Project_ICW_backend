@@ -4,6 +4,9 @@ const { v4: uuidv4 } = require("uuid");
 const { putItem} = require("../dynamodb");
 const { updateItem } = require("../dynamodb");
 
+const multer = require("multer");
+const upload = multer();
+
 router.post("/signIn", (req, res) => {
   console.log("Applicant Company");
   console.log(req.body);
@@ -41,8 +44,9 @@ router.post("/signUp", async (req, res) => {
   }
 });
 
-router.post("/edit", async (req, res) => {
-  console.log(req.body.name)
+router.post("/edit", upload.single(""), async (req, res) => {
+  console.log(req.body)
+  
   //database
 //  const params = {
 //    TableName: "company",
