@@ -112,7 +112,7 @@ router.post("/profile/edit", (req, res) => {
 // });
 // const upload = multer({ storage: storage });
 
-router.post("/resume/upload", isAuthen, upload.single("file"), async (req, res) => {
+router.post("/resume/upload", upload.single("file"), async (req, res) => {
   console.log("Applicant Resume Upload " + req.body.user_id);
   const file = req.file;
   if (!file) {
