@@ -15,8 +15,9 @@ app.use(logger);
 
 app.use("/applicant", require("./routes/applicant"));
 app.use("/company", require("./routes/company"));
+app.use("/admin", require("./routes/admin"));
 
-app.post("/welcome", isAuthen, (req, res) => {
+app.get("/welcome", (req, res) => {
   res.status(200).send("Welcome 🙌 ");
 });
 
@@ -24,3 +25,4 @@ const port = `${process.env.PORT}`;
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
 });
+

@@ -170,4 +170,32 @@ router.post("/resume/edit", upload.single("file"), async (req, res) => {
   }
 });
 
+router.post("/sendReport", async (req, res) => {
+  //database
+  console.log(req.body);
+
+  const params = {
+    TableName: "JobReport",
+    Item: {
+      id: { S: uuidv4() }, // String type
+      message: { S: req.body.message },
+      user_id: { S: req.body.user_id },
+      job_id: { S: req.body.job_id },
+      creation_date: { S: req.body.creation_date }
+    },
+  };
+
+  try {
+    await putItem(params);
+    res.status(201).json({
+      message: "sendReport successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send(error.message);
+  }
+});
+//sendReport
+
+
 module.exports = router;
