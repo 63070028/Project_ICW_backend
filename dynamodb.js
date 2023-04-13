@@ -37,4 +37,15 @@ module.exports = {
       throw err;
     }
   },
+  updateItem: async (params) => {
+    try {
+      const data = await dynamodb.putItem(params).promise();
+      console.log(`Item updated successfully: ${JSON.stringify(data)}`);
+      return data.Attributes; // Return the updated Attributes object
+    } catch (err) {
+      console.log(`Error updating item in table: ${err}`);
+      throw err;
+    }
+  }
+
 };
