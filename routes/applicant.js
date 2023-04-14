@@ -135,7 +135,7 @@ router.post("/resume/upload", upload.single("file"), async (req, res) => {
   }
 });
 
-router.post("/resume/edit", upload.single("file"), async (req, res) => {
+router.post("/resume/edit", upload.single("file"), async (req, res) => { 
   console.log("Applicant Resume Edit " + req.body.user_id);
   const file = req.file;
   if (!file) {
