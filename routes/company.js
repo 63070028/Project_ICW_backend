@@ -36,7 +36,9 @@ router.post("/signUp", async (req, res) => {
   }
 });
 
-router.post("/edit",upload.fields([
+router.post(
+  "/edit",
+  upload.fields([
     { name: "profile_image", maxCount: 1 },
     { name: "background_image", maxCount: 1 },
   ]),
@@ -45,66 +47,60 @@ router.post("/edit",upload.fields([
     console.log(req.files);
     const profileImageFile = req.files["profile_image"]?.[0];
     const backgroundImageFile = req.files["background_image"]?.[0];
-   // let profileImageUrl = "";
-   // let backgroundImageUrl = "";
+    // let profileImageUrl = "";
+    // let backgroundImageUrl = "";
     try {
-      if (profileImageFile) {
-        const fileName = `${req.body.id}-${uuidv4()}-${profileImageFile.originalname
-          }`;
-        const folderS3 = "images";
-        let profileImageUrl = await uploadToS3(
-          `${process.env.S3_BUCKET}`,
-          fileName,
-          folderS3,
-          profileImageFile
-        );
-        console.log("Profile image uploaded to:", profileImageUrl);
-      }
-      if (backgroundImageFile) {
-        const fileName = `${req.body.id}-${uuidv4()}-${backgroundImageFile.originalname
-          }`;
-        const folderS3 = "background_images";
-        let backgroundImageUrl = await uploadToS3(
-          `${process.env.S3_BUCKET}`,
-          fileName,
-          folderS3,
-          backgroundImageFile
-        );
-        console.log("Background image uploaded to:", backgroundImageUrl);
-      }
+      const fileNameProfileImage = `${req.body.id}-${uuidv4()}-${
+        profileImageFile.originalname
+      }`;
+      const foldeImagesrS3 = "images";
+      const profileImageUrl = await uploadToS3(
+        `${process.env.S3_BUCKET}`,
+        fileNameProfileImage,
+        foldeImagesrS3,
+        profileImageFile
+      );
+      console.log("Profile image uploaded to:", profileImageUrl);
+
+      const fileNameBackgroundImage = `${req.body.id}-${uuidv4()}-${
+        backgroundImageFile.originalname
+      }`;
+      const folderBackgroundS3 = "background_images";
+      const backgroundImageUrl = await uploadToS3(
+        `${process.env.S3_BUCKET}`,
+        fileNameBackgroundImage,
+        folderBackgroundS3,
+        backgroundImageFile
+      );
+      console.log("Background image uploaded to:", backgroundImageUrl);
+
       const params = {
         TableName: "company",
         Key: {
-          "id": { "S":  req.body.id }
+          id: { S: req.body.id },
         },
-        UpdateExpression: "SET #n = :val1,  description = :val2, profile_image = :val3, background_image = :val4, video_iframe = :val5, #s = :val8",
+        UpdateExpression:
+          "SET #n = :val1,  description = :val2, profile_image = :val3, background_image = :val4, video_iframe = :val5, #s = :val8",
         ExpressionAttributeValues: {
-          ":val1": { "S": req.body.name },
-          ":val2": { "S": req.body.description },
-          ":val3": { "S": profileImageUrl},
-          ":val4": { "S": backgroundImageUrl },
-          ":val5": { "S":  req.body.video_iframe},
-          ":val8": { "S":  req.body.state },
+          ":val1": { S: req.body.name },
+          ":val2": { S: req.body.description },
+          ":val3": { S: profileImageUrl },
+          ":val4": { S: backgroundImageUrl },
+          ":val5": { S: req.body.video_iframe },
+          ":val8": { S: req.body.state },
         },
         ExpressionAttributeNames: {
           "#s": "state",
-          "#n": "name"
-        },  
-        ReturnValues: "ALL_NEW"
+          "#n": "name",
+        },
+        ReturnValues: "ALL_NEW",
       };
-    
-
-      try {
-        await updateItem(params);
-        res.status(201).json({
-          message: "Company profile updated successfully",
-          ...(profileImageUrl ? { profile_image: profileImageUrl } : {}),
-          ...(backgroundImageUrl ? { background_image: backgroundImageUrl } : {}),
-        });
-      } catch (error) {
-        console.error(error);
-        res.status(500).send(error.message);
-      }
+      await updateItem(params);
+      res.status(201).json({
+        message: "Company profile updated successfully",
+        ...(profileImageUrl ? { profile_image: profileImageUrl } : {}),
+        ...(backgroundImageUrl ? { background_image: backgroundImageUrl } : {}),
+      });
     } catch (error) {
       console.error(error);
       res.status(500).send(error.message);
