@@ -18,7 +18,7 @@ app.use("/company", require("./routes/company"));
 app.use("/admin", require("./routes/admin"));
 app.use("/user", require("./routes/user"));
 
-app.get("/welcome", (req, res) => {
+app.get("/welcome", isAuthen, (req, res) => {
   res.status(200).send("Welcome 🙌 ");
 });
 

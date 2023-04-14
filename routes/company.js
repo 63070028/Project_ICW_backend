@@ -7,14 +7,6 @@ const { updateItem } = require("../dynamodb");
 const multer = require("multer");
 const upload = multer();
 
-router.post("/signIn", (req, res) => {
-  console.log("Applicant Company");
-  console.log(req.body);
-
-  //ตรวจข้อมูลใน database
-
-  //res applicant_info
-});
 
 router.post("/signUp", async (req, res) => {
   //database

@@ -7,69 +7,8 @@ const upload = multer();
 const { v4: uuidv4 } = require("uuid");
 const { uploadToS3, deleteObjectToS3 } = require("../s3");
 const { putItem, scanTable } = require("../dynamodb");
-const jwt = require("jsonwebtoken");
 const isAuthen = require("../middleware/isAuthen");
 
-router.post("/signIn", async (req, res) => {
-  console.log(req.body);
-
-  //ตรวจข้อมูลใน database
-  try {
-    const items = await scanTable({ TableName: "applicant" });
-    const user = items.find((item) => item.email.S === req.body.email);
-
-    if (!user) {
-      return res.status(401).json({ message: "Invalid credentials" });
-    }
-
-    if (!(user.password.S === req.body.password)) {
-      return res.status(401).json({ message: "Invalid credentials" });
-    }
-
-    const user_data = {
-      id: user.id.S,
-      firstName: user.firstName.S,
-      lastName: user.lastName.S,
-      email_profile: user.email_profile.S,
-      birthDate: user.birthDate.S,
-      gender: user.gender.S,
-      address: user.address.S,
-      phone: user.phone.S,
-      resume: user.resume.S,
-      transcript: user.transcript.S,
-      portfolio: user.portfolio.S,
-      state: user.state.S,
-    };
-
-    const tokens = await scanTable({ TableName: "authen" });
-    let token = tokens.find((token) => token.user_id.S === user.id.S);
-
-    console.log(token);
-    if (!token) {
-      //// Generate and save token into database
-      token = jwt.sign({ id: user.id.S , role: 'applicant'}, `${process.env.secretKey}`);
-      const token_prams = {
-        TableName: "authen",
-        Item: {
-          id: { S: uuidv4() },
-          user_id: { S: user.id.S },
-          token: { S: token },
-        },
-      };
-      await putItem(token_prams);
-      res.json({ token:token, id: user_data.id, user_role: "applicant" });
-    } else {
-      res.json({
-        token:token.token.S,
-        id: user_data.id,
-        user_role: "applicant",
-      });
-    }
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
-  }
-});
 
 router.post("/signUp", async (req, res) => {
   //database
