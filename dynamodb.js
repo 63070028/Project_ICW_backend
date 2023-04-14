@@ -46,6 +46,16 @@ module.exports = {
       console.log(`Error updating item in table: ${err}`);
       throw err;
     }
+  },
+  deleteItem: async (params) => {
+    try {
+      const data = await dynamodb.deleteItem(params).promise();
+      console.log(`Item deleted successfully: ${JSON.stringify(data)}`);
+      return data;
+    } catch (err) {
+      console.log(`Error deleting item from table: ${err}`);
+      throw err;
+    }
   }
-
 };
+

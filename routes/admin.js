@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
-const { putItem, scanTable } = require("../dynamodb");
+const {scanTable } = require("../dynamodb");
 
 router.get("/getReportJob" , async (req, res) => {
     

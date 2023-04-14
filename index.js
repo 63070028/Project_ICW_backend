@@ -16,6 +16,7 @@ app.use(logger);
 app.use("/applicant", require("./routes/applicant"));
 app.use("/company", require("./routes/company"));
 app.use("/admin", require("./routes/admin"));
+app.use("/user", require("./routes/user"));
 
 app.get("/welcome", (req, res) => {
   res.status(200).send("Welcome 🙌 ");
