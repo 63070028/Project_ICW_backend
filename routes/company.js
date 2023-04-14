@@ -45,14 +45,14 @@ router.post("/edit",upload.fields([
     console.log(req.files);
     const profileImageFile = req.files["profile_image"]?.[0];
     const backgroundImageFile = req.files["background_image"]?.[0];
-    let profileImageUrl = "";
-    let backgroundImageUrl = "";
+   // let profileImageUrl = "";
+   // let backgroundImageUrl = "";
     try {
       if (profileImageFile) {
         const fileName = `${req.body.id}-${uuidv4()}-${profileImageFile.originalname
           }`;
         const folderS3 = "images";
-        profileImageUrl = await uploadToS3(
+        let profileImageUrl = await uploadToS3(
           `${process.env.S3_BUCKET}`,
           fileName,
           folderS3,
@@ -64,7 +64,7 @@ router.post("/edit",upload.fields([
         const fileName = `${req.body.id}-${uuidv4()}-${backgroundImageFile.originalname
           }`;
         const folderS3 = "background_images";
-        backgroundImageUrl = await uploadToS3(
+        let backgroundImageUrl = await uploadToS3(
           `${process.env.S3_BUCKET}`,
           fileName,
           folderS3,
@@ -75,26 +75,24 @@ router.post("/edit",upload.fields([
       const params = {
         TableName: "company",
         Key: {
-          id: { S: req.body.id },
+          "id": { "S":  req.body.id }
         },
-        UpdateExpression: `
-        name = :name,
-        description = :description,
-        ${profileImageUrl ? "profile_image = :profile_image," : ""}
-        ${backgroundImageUrl ? "background_image = :background_image," : ""}
-        video_iframe = :video_iframe,
-        state = :state
-      `,
-      ExpressionAttributeValues: {
-
-        ":name": { S: req.body.name },
-        ":description": { S: req.body.description},
-        ":profile_image": {S: profileImageUrl},
-        ":background_image": { S: backgroundImageUrl},
-        ":video_iframe": { S: req.body.video_iframe },
-        ":state": { S: req.body.state },
-        }
+        UpdateExpression: "SET #n = :val1,  description = :val2, profile_image = :val3, background_image = :val4, video_iframe = :val5, #s = :val8",
+        ExpressionAttributeValues: {
+          ":val1": { "S": req.body.name },
+          ":val2": { "S": req.body.description },
+          ":val3": { "S": profileImageUrl},
+          ":val4": { "S": backgroundImageUrl },
+          ":val5": { "S":  req.body.video_iframe},
+          ":val8": { "S":  req.body.state },
+        },
+        ExpressionAttributeNames: {
+          "#s": "state",
+          "#n": "name"
+        },  
+        ReturnValues: "ALL_NEW"
       };
+    
 
       try {
         await updateItem(params);
