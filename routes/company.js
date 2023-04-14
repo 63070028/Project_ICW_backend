@@ -44,9 +44,14 @@ router.post("/signUp", async (req, res) => {
   }
 });
 
-router.post("/edit", upload.single(""), async (req, res) => {
+const uploadFields = [
+  { name: 'profile_image', maxCount: 1 },
+  { name: 'background_image', maxCount: 1 }
+];
+router.post('/edit', upload.fields(uploadFields), (req, res) => {
   console.log(req.body)
-  
+
+
   //database
 //  const params = {
 //    TableName: "company",
