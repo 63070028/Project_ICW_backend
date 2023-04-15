@@ -97,8 +97,8 @@ router.post(
       await updateItem(params);
       res.status(201).json({
         message: "Company profile updated successfully",
-        ...(profileImageUrl ? { profile_image: profileImageUrl } : {}),
-        ...(backgroundImageUrl ? { background_image: backgroundImageUrl } : {}),
+        profile_image:profileImageUrl,
+        background_image:backgroundImageUrl
       });
     } catch (error) {
       console.error(error);
@@ -131,4 +131,53 @@ router.get("/getProfile/:id", async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+
+//getJob
+router.get("/getJob/:id", async (req, res) => {
+  try {
+    console.log("test");
+    const items = await scanTable({ TableName: "job" });
+
+    const jobs_t = items.filter((item) => item.company_id.S == req.params.id);
+
+    const jobs = jobs_t.map((item) => {
+      return {
+          id: item.id.S,
+          capacity: item.capacity.N,
+          company_id: item.company_id.S,
+          creation_date: item.creation_date.S,
+          detail: item.detail.S,
+          interview: item.interview.S,
+          location: item.location.S,
+          name:item.name.S,
+          salary_per_day:item.salary_per_day.N,
+          contact:{name:item.contact.M.name.S, email:item.contact.M.email.S, phone:item.contact.M.phone.S},
+          qualifications:item.qualifications.SS,
+          state: item.state.S,
+        }
+    })
+    //const jobs = {
+    //  id: job_t.id.S,
+    //  capacity: job_t.capacity.N,
+    //  company_id: job_t.company_id.S,
+    //  creation_date: job_t.creation_date.S,
+    //  detail: job_t.detail.S,
+    //  interview: job_t.interview.S,
+    //  location: job_t.location.S,
+    //  name:job_t.name.S,
+    //  salary_per_day:job_t.salary_per_day.N,
+    //  contact:{name:job_t.contact.M.name.S, email:job_t.contact.M.email.S, phone:job_t.contact.M.phone.S},
+    //  qualifications:job_t.qualifications.SS,
+    //  state: job_t.state.S,
+    //};
+
+    res.status(201).json({
+      items: jobs,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 module.exports = router;
