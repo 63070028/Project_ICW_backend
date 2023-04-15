@@ -44,9 +44,10 @@ router.post("/signUp", async (req, res) => {
   }
 });
 
-router.get("/getProfile/:id", async (req, res) => {
+router.get("/getProfileById/:id", async (req, res) => {
   try {
     const applicants = await scanTable({ TableName: "applicant" });
+    
     const applicant_t = applicants.find((item) => item.id.S == req.params.id);
     const applicant = {
       id: applicant_t.id.S,
@@ -101,7 +102,7 @@ router.post("/editProfile", isAuthen, async (req, res) => {
   try {
     await updateItem(params);
     res.status(201).json({
-      message: "signUp successfully",
+      message: "Update successfully",
     });
   } catch (error) {
     console.error(error);
@@ -210,6 +211,8 @@ router.post("/sendReport", async (req, res) => {
       id: { S: uuidv4() }, // String type
       message: { S: req.body.message },
       user_id: { S: req.body.user_id },
+      company_name: { S: req.body.company_name },
+      job_name: { S: req.body.job_name },
       job_id: { S: req.body.job_id },
       creation_date: { S: req.body.creation_date },
     },
