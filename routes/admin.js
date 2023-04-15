@@ -13,6 +13,8 @@ router.get("/getReportJob", async (req, res) => {
       return {
         message: item.message.S,
         job_id: item.job_id.S,
+        company_name: item.company_name.S,
+        job_name: item.job_name.S,
         user_id: item.user_id.S,
         creation_date: item.creation_date.S,
       };
@@ -51,65 +53,62 @@ router.get("/getCompany", async (req, res) => {
 });
 
 router.get("/getCompanyJob", async (req, res) => {
-    try {
-      console.log("test");
-      const items = await scanTable({ TableName: "job" });
-      console.log(items);
+  try {
+    console.log("test");
+    const items = await scanTable({ TableName: "job" });
+    console.log(items);
 
-      const Job = items.map((item) => {
-        return {
-            id:item.id.S,
-            company_id:item.company_id.S,
-            name:item.name.S,
-            salary_per_day:item.salary_per_day.N,
-            location:item.location.S,
-            capacity:item.capacity.N,
-            detail:item.detail.S,
-            interview:item.interview.S,
-            qualifications:item.qualifications.SS,
-            contact:item.contact,
-            creation_date:item.creation_date.S,
-            state:item.state.S
-        };
-      });
-      res.status(201).json({
-        items: Job,
-      });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: "Server error" });
-    }
-  });
+    const Job = items.map((item) => {
+      return {
+        id: item.id.S,
+        company_id: item.company_id.S,
+        name: item.name.S,
+        salary_per_day: item.salary_per_day.N,
+        location: item.location.S,
+        capacity: item.capacity.N,
+        detail: item.detail.S,
+        interview: item.interview.S,
+        qualifications: item.qualifications.SS,
+        contact: item.contact,
+        creation_date: item.creation_date.S,
+        state: item.state.S,
+      };
+    });
+    res.status(201).json({
+      items: Job,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
 
+router.post("/changeJobState", async (req, res) => {
+  console.log(req.body);
 
-  router.post("/changeJobState",  async (req, res) => {
-    console.log(req.body)
-  
-    const params = {
-      TableName: "job",
-      Key: {
-        "id": { "S":  req.body.id }
-      },
-      UpdateExpression: "SET #s = :val8",
-      ExpressionAttributeValues: {
-        ":val8": { "S":  req.body.state },
-  
-      },
-      ExpressionAttributeNames: {
-        "#s": "state"
-      },  
-      ReturnValues: "ALL_NEW"
-    };
-  
-  
-    try {
-      await updateItem(params);
-      res.status(201).json({
-        message: "updateState successfully",
-      });
-    } catch (error) {
-      console.error(error);
-      res.status(500).send(error.message);
-    }
-  });
+  const params = {
+    TableName: "job",
+    Key: {
+      id: { S: req.body.id },
+    },
+    UpdateExpression: "SET #s = :val8",
+    ExpressionAttributeValues: {
+      ":val8": { S: req.body.state },
+    },
+    ExpressionAttributeNames: {
+      "#s": "state",
+    },
+    ReturnValues: "ALL_NEW",
+  };
+
+  try {
+    await updateItem(params);
+    res.status(201).json({
+      message: "updateState successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send(error.message);
+  }
+});
 module.exports = router;
