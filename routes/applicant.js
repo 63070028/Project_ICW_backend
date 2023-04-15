@@ -71,47 +71,32 @@ router.get("/getProfile/:id", async (req, res) => {
   }
 });
 
-router.post("/editProfile",  async (req, res) => {
-  console.log(req.body)
-
-  // const params = {
-  //   TableName: "applicant",
-  //   Item: {
-  //     id: { S: req.body.id }, // String type
-  //     firstName: { S: req.body.firstName },
-  //     lastName: { S: req.body.lastName },
-  //     email_profile: { S: req.body.email_profile },
-  //     birthDate: { S: req.body.birthDate },
-  //     gender: { S: req.body.gender },
-  //     address: { S: req.body.address },
-  //     phone: { S: req.body.phone },
-  //     state: { S: req.body.state },
-  //   },
-  // };
+router.post("/editProfile", isAuthen, async (req, res) => {
+  console.log(req.user);
+  console.log(req.body);
 
   const params = {
     TableName: "applicant",
     Key: {
-      "id": { "S":  req.body.id }
+      id: { S: req.body.id },
     },
-    UpdateExpression: "SET firstName = :val1, lastName = :val2, email_profile = :val3, birthDate = :val4, gender = :val5, address = :val6, phone = :val7, #s = :val8",
+    UpdateExpression:
+      "SET firstName = :val1, lastName = :val2, email_profile = :val3, birthDate = :val4, gender = :val5, address = :val6, phone = :val7, #s = :val8",
     ExpressionAttributeValues: {
-      ":val1": { "S": req.body.firstName },
-      ":val2": { "S": req.body.lastName  },
-      ":val3": { "S": req.body.email_profile  },
-      ":val4": { "S": req.body.birthDate },
-      ":val5": { "S": req.body.gender },
-      ":val6": { "S": req.body.address },
-      ":val7": { "S":  req.body.phone },
-      ":val8": { "S":  req.body.state },
-
+      ":val1": { S: req.body.firstName },
+      ":val2": { S: req.body.lastName },
+      ":val3": { S: req.body.email_profile },
+      ":val4": { S: req.body.birthDate },
+      ":val5": { S: req.body.gender },
+      ":val6": { S: req.body.address },
+      ":val7": { S: req.body.phone },
+      ":val8": { S: req.body.state },
     },
     ExpressionAttributeNames: {
-      "#s": "state"
-    },  
-    ReturnValues: "ALL_NEW"
+      "#s": "state",
+    },
+    ReturnValues: "ALL_NEW",
   };
-
 
   try {
     await updateItem(params);
@@ -124,31 +109,50 @@ router.post("/editProfile",  async (req, res) => {
   }
 });
 
-router.post("/resume/upload", upload.single("file"), async (req, res) => {
-  console.log("Applicant Resume Upload " + req.body.user_id);
-  const file = req.file;
-  if (!file) {
-    return res.status(400).send({ error: "No file uploaded" });
-  }
-  const FileName = `${req.body.user_id}-${uuidv4()}-${file.originalname}`;
-  const FolderS3 = "resume";
-  try {
-    const location = await uploadToS3(
-      `${process.env.S3_BUCKET}`,
-      FileName,
-      FolderS3,
-      file
-    );
-    console.log("File uploaded to:", location);
-    res.status(201).json({ url: location });
-  } catch (error) {
-    console.error(error);
-    res.status(500).send(error.message);
-  }
-});
+router.post("/pdf/upload", isAuthen, upload.single("file"), async (req, res) => {
 
-router.post("/resume/edit", upload.single("file"), async (req, res) => { 
-  console.log("Applicant Resume Edit " + req.body.user_id);
+    console.log(req.user);
+    console.log("Applicant " + req.body.category + " Upload " + req.body.id);
+
+    const file = req.file;
+    if (!file) {
+      return res.status(400).send({ error: "No file uploaded" });
+    }
+    const FileName = `${req.body.id}-${uuidv4()}-${file.originalname}`;
+    const FolderS3 = req.body.category;
+    try {
+      const location = await uploadToS3(
+        `${process.env.S3_BUCKET}`,
+        FileName,
+        FolderS3,
+        file
+      );
+      console.log("File uploaded to:", location);
+
+      const params = {
+        TableName: "applicant",
+        Key: {
+          id: { S: req.body.id },
+        },
+        UpdateExpression: "SET " + req.body.category + " = :val1",
+        ExpressionAttributeValues: {
+          ":val1": { S: location },
+        },
+
+        ReturnValues: "ALL_NEW",
+      };
+      await updateItem(params);
+      res.status(201).json({ url: location });
+    } catch (error) {
+      console.error(error);
+      res.status(500).send(error.message);
+    }
+  }
+);
+
+router.post("/pdf/edit", isAuthen, upload.single("file"), async (req, res) => {
+  console.log(req.user);
+  console.log("Applicant " + req.body.category + " Edit " + req.body.id);
   const file = req.file;
   if (!file) {
     return res.status(400).send({ error: "No file uploaded" });
@@ -165,8 +169,8 @@ router.post("/resume/edit", upload.single("file"), async (req, res) => {
   console.log("File Deleted");
 
   //อัปอันใหม่
-  const FileName = `${req.body.user_id}-${uuidv4()}-${file.originalname}`;
-  const FolderS3 = "resume";
+  const FileName = `${req.body.id}-${uuidv4()}-${file.originalname}`;
+  const FolderS3 = req.body.category;
   try {
     const location = await uploadToS3(
       `${process.env.S3_BUCKET}`,
@@ -175,6 +179,20 @@ router.post("/resume/edit", upload.single("file"), async (req, res) => {
       file
     );
     console.log("File uploaded to:", location);
+
+    const params = {
+      TableName: "applicant",
+      Key: {
+        id: { S: req.body.id },
+      },
+      UpdateExpression: "SET " + req.body.category + " = :val1",
+      ExpressionAttributeValues: {
+        ":val1": { S: location },
+      },
+
+      ReturnValues: "ALL_NEW",
+    };
+    await updateItem(params);
     res.status(201).json({ url: location });
   } catch (error) {
     console.error(error);

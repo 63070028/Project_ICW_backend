@@ -21,6 +21,13 @@ router.post("/signIn", async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
+    const user_data = {
+      id:user.id.S,
+      email:user.email.S,
+      role:req.body.role,
+      state:user.state.S
+    }
+    
     console.log('test')
 
     const tokens = await scanTable({ TableName: "authen" });
@@ -29,7 +36,7 @@ router.post("/signIn", async (req, res) => {
     if (!token) {
       //// Generate and save token into database
       token = jwt.sign(
-        { id: user.id.S, role: req.body.role },
+        user_data,
         `${process.env.secretKey}`
       );
       const token_prams = {
@@ -41,12 +48,11 @@ router.post("/signIn", async (req, res) => {
         },
       };
       await putItem(token_prams);
-      res.json({ token: token, id: user.id.S, user_role: req.body.role });
+      res.json({ token: token, user: user_data });
     } else {
       res.json({
         token: token.token.S,
-        id: user.id.S,
-        user_role: req.body.role,
+        user: user_data
       });
     }
   } catch (error) {
