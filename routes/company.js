@@ -1,8 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { v4: uuidv4 } = require("uuid");
-const { putItem } = require("../dynamodb");
-const { updateItem } = require("../dynamodb");
+const { putItem , scanTable, updateItem} = require("../dynamodb");
 const { uploadToS3 } = require("../s3");
 
 const multer = require("multer");
@@ -108,4 +107,28 @@ router.post(
   }
 );
 
+
+//getcompany
+router.get("/getProfile/:id", async (req, res) => {
+  try {
+    const companies = await scanTable({ TableName: "company" });
+    const company_t = companies.find((item) => item.id.S == req.params.id);
+    const company = {
+      id: company_t.id.S,
+      name: company_t.name.S,
+      email: company_t.email.S,
+      description: company_t.description.S,
+      profile_image: company_t.profile_image.S,
+      background_image: company_t.background_image.S,
+      video_iframe: company_t.video_iframe.S,
+      state: company_t.state.S,
+    };
+    res.status(201).json({
+      company: company,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
 module.exports = router;
