@@ -144,6 +144,7 @@ router.get("/getJob/:id", async (req, res) => {
       return {
           id: item.id.S,
           capacity: item.capacity.N,
+          company_name: item.company_name.S,
           company_id: item.company_id.S,
           creation_date: item.creation_date.S,
           detail: item.detail.S,
