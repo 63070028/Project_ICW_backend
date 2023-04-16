@@ -174,11 +174,12 @@ router.get("/getJobById/:id", async (req, res) => {
   console.log(req.params.id);
   try {
     const items = await scanTable({ TableName: "job" });
-    const job_t = items.find((item) => item.company_id.S == req.params.id);
-    
+    const job_t = items.find((item) => item.id.S == req.params.id);
+
     const job = {
       id: job_t.id.S,
       capacity: job_t.capacity.N,
+      company_name: job_t.company_name.S,
       company_id: job_t.company_id.S,
       creation_date: job_t.creation_date.S,
       detail: job_t.detail.S,
