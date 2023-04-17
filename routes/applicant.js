@@ -44,10 +44,10 @@ router.post("/signUp", async (req, res) => {
   }
 });
 
-router.get("/getProfileById/:id", async (req, res) => {
+router.get("/getProfileById/:id", isAuthen, async (req, res) => {
   try {
     const applicants = await scanTable({ TableName: "applicant" });
-    
+
     const applicant_t = applicants.find((item) => item.id.S == req.params.id);
     const applicant = {
       id: applicant_t.id.S,
@@ -110,8 +110,11 @@ router.post("/editProfile", isAuthen, async (req, res) => {
   }
 });
 
-router.post("/pdf/upload", isAuthen, upload.single("file"), async (req, res) => {
-
+router.post(
+  "/pdf/upload",
+  isAuthen,
+  upload.single("file"),
+  async (req, res) => {
     console.log(req.user);
     console.log("Applicant " + req.body.category + " Upload " + req.body.id);
 
@@ -201,7 +204,7 @@ router.post("/pdf/edit", isAuthen, upload.single("file"), async (req, res) => {
   }
 });
 
-router.post("/sendReport", async (req, res) => {
+router.post("/sendReport", isAuthen, async (req, res) => {
   //database
   console.log(req.body);
 
