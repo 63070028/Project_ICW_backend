@@ -204,4 +204,36 @@ router.get("/getJobById/:id", async (req, res) => {
   }
 });
 
+
+router.post("/setJobState", async (req, res) => {
+  console.log(req.body);
+
+  const params = {
+    TableName: "job",
+    Key: {
+      id: { S: req.body.id },
+    },
+    UpdateExpression: "SET #s = :val8",
+    ExpressionAttributeValues: {
+      ":val8": { S: req.body.state },
+    },
+    ExpressionAttributeNames: {
+      "#s": "state",
+    },
+    ReturnValues: "ALL_NEW",
+  };
+
+  try {
+    await updateItem(params);
+    res.status(201).json({
+      message: "updateState successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send(error.message);
+  }
+});
+
+
+
 module.exports = router;
