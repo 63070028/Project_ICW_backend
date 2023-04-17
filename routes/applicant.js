@@ -214,6 +214,7 @@ router.post("/sendReport", isAuthen, async (req, res) => {
       id: { S: uuidv4() }, // String type
       message: { S: req.body.message },
       user_id: { S: req.body.user_id },
+      company_id: { S: req.body.company_id},
       company_name: { S: req.body.company_name },
       job_name: { S: req.body.job_name },
       job_id: { S: req.body.job_id },

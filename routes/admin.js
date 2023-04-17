@@ -13,6 +13,7 @@ router.get("/getReportJob", async (req, res) => {
       return {
         message: item.message.S,
         job_id: item.job_id.S,
+        company_id: item.company_id.S,
         company_name: item.company_name.S,
         job_name: item.job_name.S,
         user_id: item.user_id.S,

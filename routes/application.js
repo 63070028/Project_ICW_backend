@@ -13,6 +13,7 @@ router.post("/sendApplicationJob", isAuthen, async (req, res) => {
     Item: {
       id: { S: uuidv4() }, // String type
       applicant_id: { S: req.body.applicant_id },
+      company_id: { S: req.body.company_id},
       company_name: { S: req.body.company_name },
       job_name: { S: req.body.job_name },
       job_id: { S: req.body.job_id },
@@ -49,6 +50,7 @@ router.post("/sendApplicationProgram", isAuthen, async (req, res) => {
     Item: {
       id: { S: uuidv4() },
       applicant_id: { S: req.body.applicant_id },
+      company_id: { S: req.body.company_id},
       company_name: { S: req.body.company_name },
       program_id: { S: req.body.program_id },
       program_name: { S: req.body.program_name },
