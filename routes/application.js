@@ -79,5 +79,101 @@ router.post("/sendApplicationProgram", isAuthen, async (req, res) => {
       res.status(500).send(error.message);
     }
 });
+router.get("/getApplicantJob", async (req, res) => {
+  try {
+    console.log("test");
+    const items = await scanTable({ TableName: "ApplicationJob" });
+    console.log(items);
+    const ApplicationJob = items.map((item) => {
+      return {
+        id: item.id.S,
+        applicant_id: item.applicant_id.S,
+        company_name: item.company_name.S,
+        company_id: item.company_id.S,
+        job_name: item.job_name.S,
+        job_id: item.job_id.S,
+        firstName: item.firstName.S,
+        lastName: item.lastName.S,
+        email_profile: item.email_profile.S,
+        birthDate: item.birthDate.S,
+        gender: item.gender.S,
+        address: item.address.S,
+        phone: item.phone.S,
+        resume: item.resume.S,
+        transcript: item.transcript.S,
+        portfolio: item.portfolio.S,
+        state: item.state.S,
+      };
+    });
+    res.status(201).json({
+      items: ApplicationJob,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+router.get("/getApplicantProgram", async (req, res) => {
+  try {
+    console.log("test");
+    const items = await scanTable({ TableName: "ApplicationProgram" });
+    console.log(items);
+    const ApplicationProgram = items.map((item) => {
+      return {
+        id: item.id.S,
+        applicant_id: item.applicant_id.S,
+        company_name: item.company_name.S,
+        company_id: item.company_id.S,
+        program_name: item.program_name.S,
+        program_id: item.program_id.S,
+        job_title: item.job_title.S,
+        firstName: item.firstName.S,
+        lastName: item.lastName.S,
+        email_profile: item.email_profile.S,
+        birthDate: item.birthDate.S,
+        gender: item.gender.S,
+        address: item.address.S,
+        phone: item.phone.S,
+        resume: item.resume.S,
+        transcript: item.transcript.S,
+        portfolio: item.portfolio.S,
+        state: item.state.S,
+      };
+    });
+    res.status(201).json({
+      items: ApplicationProgram,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+router.get("/getApplicationJobById/:id", async (req, res) => {
+  try {
+    const applicants = await scanTable({ TableName: "applicant" });
+
+    const applicant_t = applicants.find((item) => item.id.S == req.params.id);
+    const applicant = {
+      id: applicant_t.id.S,
+      firstName: applicant_t.firstName.S,
+      lastName: applicant_t.lastName.S,
+      email_profile: applicant_t.email_profile.S,
+      birthDate: applicant_t.birthDate.S,
+      gender: applicant_t.gender.S,
+      address: applicant_t.address.S,
+      phone: applicant_t.phone.S,
+      resume: applicant_t.resume.S,
+      transcript: applicant_t.transcript.S,
+      portfolio: applicant_t.portfolio.S,
+      state: applicant_t.state.S,
+    };
+    res.status(201).json({
+      applicant: applicant,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
 
 module.exports = router;
