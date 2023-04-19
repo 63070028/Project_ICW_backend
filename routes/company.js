@@ -187,7 +187,12 @@ router.post("/editJob", async (req, res) => {
         ":interview": { S: req.body.interview },
         ":salary_per_day": { N: req.body.salary_per_day.toString() },
         ":state": { S: req.body.state },
-        ":qualifications": { SS: req.body.qualifications.length > 0 ? req.body.qualifications : ["None"] }, // Check if array is not empty
+        ":qualifications": {
+          SS:
+            req.body.qualifications.length > 0
+              ? req.body.qualifications
+              : ["None"],
+        }, // Check if array is not empty
       },
       ExpressionAttributeNames: {
         "#s": "state",
@@ -231,7 +236,10 @@ router.post("/addJob", async (req, res) => {
           },
         },
         qualifications: {
-          SS: req.body.qualifications.length > 0 ? req.body.qualifications : ["None"],
+          SS:
+            req.body.qualifications.length > 0
+              ? req.body.qualifications
+              : ["None"],
         },
         state: { S: req.body.state },
       },
@@ -246,7 +254,6 @@ router.post("/addJob", async (req, res) => {
     res.status(500).send(error.message);
   }
 });
-
 
 router.post("/getJobById", async (req, res) => {
   try {

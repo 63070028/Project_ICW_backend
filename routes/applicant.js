@@ -257,7 +257,11 @@ router.post("/saveMyJobFavorite", isAuthen, async (req, res) => {
 router.post("/removeMyJobFavorite", isAuthen, async (req, res) => {
   console.log(req.body);
   const jobFavorite = await scanTable({ TableName: "JobFavorite" });
-  const job = jobFavorite.find((job) => job.applicant_id.S == req.body.applicant_id && job.job_id.S == req.body.job_id);
+  const job = jobFavorite.find(
+    (job) =>
+      job.applicant_id.S == req.body.applicant_id &&
+      job.job_id.S == req.body.job_id
+  );
 
   if (!job) {
     res.status(404).json({
@@ -282,5 +286,47 @@ router.post("/removeMyJobFavorite", isAuthen, async (req, res) => {
     res.status(500).send(error.message);
   }
 });
+
+router.post("/getMyJobFavorite", isAuthen, async (req, res) => {
+  try {
+    const allJobs_t = await scanTable({ TableName: "job" });
+    const jobFavorite = await scanTable({ TableName: "JobFavorite" });
+    const myJobFavorite = jobFavorite.filter(
+      (job) => job.applicant_id.S == req.body.applicant_id
+    );
+    const job_t = allJobs_t.filter((job) =>
+      myJobFavorite.some((favorite) => favorite.job_id.S == job.id.S)
+    );
+
+
+    const jobs = job_t.map((job_t) => {
+      return {
+        id: job_t.id.S,
+        capacity: job_t.capacity.N,
+        company_name: job_t.company_name.S,
+        company_id: job_t.company_id.S,
+        creation_date: job_t.creation_date.S,
+        detail: job_t.detail.S,
+        interview: job_t.interview.S,
+        location: job_t.location.S,
+        name: job_t.name.S,
+        salary_per_day: job_t.salary_per_day.N,
+        contact: {
+          name: job_t.contact.M.name.S,
+          email: job_t.contact.M.email.S,
+          phone: job_t.contact.M.phone.S,
+        },
+        qualifications: job_t.qualifications.SS,
+        state: job_t.state.S,
+      };
+    });
+
+    res.status(201).json(jobs);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send(error.message);
+  }
+});
+
 
 module.exports = router;
