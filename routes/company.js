@@ -162,13 +162,91 @@ router.get("/getJob/:id", async (req, res) => {
     });
 
     res.status(201).json({
-      items: jobs,
+      job: jobs,
     });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
   }
 });
+//editCompanyJob
+router.post("/editJob", async (req, res) => {
+  try {
+    const params = {
+      TableName: "job",
+      Key: {
+        id: { S: req.body.id },
+      },
+      UpdateExpression:
+        "SET #n = :name, #c = :capacity, #l = :location, detail = :detail, interview = :interview, salary_per_day = :salary_per_day, #s = :state, qualifications = :qualifications",
+      ExpressionAttributeValues: {
+        ":name": { S: req.body.name },
+        ":capacity": { N: req.body.capacity.toString() },
+        ":location": { S: req.body.location },
+        ":detail": { S: req.body.detail },
+        ":interview": { S: req.body.interview },
+        ":salary_per_day": { N: req.body.salary_per_day.toString() },
+        ":state": { S: req.body.state },
+        ":qualifications": { SS: req.body.qualifications.length > 0 ? req.body.qualifications : ["None"] }, // Check if array is not empty
+      },
+      ExpressionAttributeNames: {
+        "#s": "state",
+        "#n": "name",
+        "#c": "capacity",
+        "#l": "location",
+      },
+      ReturnValues: "ALL_NEW",
+    };
+
+    await updateItem(params);
+    res.status(201).json({
+      message: "Job updated successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send(error.message);
+  }
+});
+//addJob
+router.post("/addJob", async (req, res) => {
+  try {
+    const params = {
+      TableName: "job",
+      Item: {
+        id: { S: uuidv4() },
+        capacity: { N: req.body.capacity.toString() },
+        company_name: { S: req.body.company_name },
+        company_id: { S: req.body.company_id },
+        creation_date: { S: new Date().toISOString() },
+        detail: { S: req.body.detail },
+        interview: { S: req.body.interview },
+        location: { S: req.body.location },
+        name: { S: req.body.name },
+        salary_per_day: { N: req.body.salary_per_day.toString() },
+        contact: {
+          M: {
+            name: { S: req.body.contact.name },
+            email: { S: req.body.contact.email },
+            phone: { S: req.body.contact.phone },
+          },
+        },
+        qualifications: {
+          SS: req.body.qualifications.length > 0 ? req.body.qualifications : ["None"],
+        },
+        state: { S: req.body.state },
+      },
+    };
+
+    await putItem(params);
+    res.status(201).json({
+      message: "Job added successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send(error.message);
+  }
+});
+
 
 router.post("/getJobById", async (req, res) => {
   try {
