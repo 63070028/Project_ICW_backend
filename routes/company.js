@@ -247,6 +247,34 @@ router.post("/addJob", async (req, res) => {
   }
 });
 
+//getPrograms
+router.get("/getProgram/:id", async (req, res) => {
+  try {
+    const items = await scanTable({ TableName: "program" });
+
+    const program = items.find((item) => item.id.S === req.params.id);
+    
+    const result = {
+      id: program.id.S,
+      company_id: program.company_id.S,
+      company_name: program.company_name.S,
+      image: program.image.S,
+      name: program.name.S,
+      description: program.description.S,
+      course: program.course.S,
+      jobs_title: program.jobs_title.SS,
+      qualifications: program.qualifications.SS,
+      privileges: program.privileges.SS,
+      state: program.state.S,
+    };
+
+    res.status(200).json({ 
+      program: result });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
 
 router.post("/getJobById", async (req, res) => {
   try {
