@@ -6,7 +6,7 @@ const upload = multer();
 
 const { v4: uuidv4 } = require("uuid");
 const { uploadToS3, deleteObjectToS3 } = require("../s3");
-const { putItem, scanTable, updateItem } = require("../dynamodb");
+const { putItem, scanTable, updateItem, deleteItem } = require("../dynamodb");
 const isAuthen = require("../middleware/isAuthen");
 
 router.post("/signUp", async (req, res) => {
@@ -214,7 +214,7 @@ router.post("/sendReport", isAuthen, async (req, res) => {
       id: { S: uuidv4() }, // String type
       message: { S: req.body.message },
       user_id: { S: req.body.user_id },
-      company_id: { S: req.body.company_id},
+      company_id: { S: req.body.company_id },
       company_name: { S: req.body.company_name },
       job_name: { S: req.body.job_name },
       job_id: { S: req.body.job_id },
@@ -232,6 +232,55 @@ router.post("/sendReport", isAuthen, async (req, res) => {
     res.status(500).send(error.message);
   }
 });
-//sendReport
+
+router.post("/saveMyJobFavorite", isAuthen, async (req, res) => {
+  console.log(req.body);
+  const params = {
+    TableName: "JobFavorite",
+    Item: {
+      id: { S: uuidv4() },
+      applicant_id: { S: req.body.applicant_id },
+      job_id: { S: req.body.job_id },
+    },
+  };
+  try {
+    await putItem(params);
+    res.status(201).json({
+      message: "sendReport successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send(error.message);
+  }
+});
+
+router.post("/removeMyJobFavorite", isAuthen, async (req, res) => {
+  console.log(req.body);
+  const jobFavorite = await scanTable({ TableName: "JobFavorite" });
+  const job = jobFavorite.find((job) => job.applicant_id.S == req.body.applicant_id && job.job_id.S == req.body.job_id);
+
+  if (!job) {
+    res.status(404).json({
+      message: "Job not found in favorites",
+    });
+    return;
+  }
+  const params = {
+    TableName: "JobFavorite",
+    Key: {
+      id: { S: job.id.S },
+    },
+  };
+
+  try {
+    await deleteItem(params);
+    res.status(201).json({
+      message: "Job removed from favorites",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send(error.message);
+  }
+});
 
 module.exports = router;

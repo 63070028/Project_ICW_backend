@@ -170,11 +170,10 @@ router.get("/getJob/:id", async (req, res) => {
   }
 });
 
-router.get("/getJobById/:id", async (req, res) => {
-  console.log(req.params.id);
+router.post("/getJobById", async (req, res) => {
   try {
     const items = await scanTable({ TableName: "job" });
-    const job_t = items.find((item) => item.id.S == req.params.id);
+    const job_t = items.find((item) => item.id.S == req.body.job_id);
 
     const job = {
       id: job_t.id.S,
@@ -195,15 +194,24 @@ router.get("/getJobById/:id", async (req, res) => {
       qualifications: job_t.qualifications.SS,
       state: job_t.state.S,
     };
+
+    const jobFavorite = await scanTable({ TableName: "JobFavorite" });
+    let isJobFavorite = jobFavorite.find(
+      (job) =>
+        job.applicant_id.S == req.body.applicant_id &&
+        job.job_id.S == req.body.job_id
+    );
+    isJobFavorite = !isJobFavorite ? false : true;
+
     res.status(201).json({
       job: job,
+      isJobFavorite: isJobFavorite,
     });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
   }
 });
-
 
 router.post("/setJobState", async (req, res) => {
   console.log(req.body);
@@ -233,7 +241,5 @@ router.post("/setJobState", async (req, res) => {
     res.status(500).send(error.message);
   }
 });
-
-
 
 module.exports = router;
