@@ -293,7 +293,6 @@ router.post("/getJobById", async (req, res) => {
 
 router.post("/setJobState", async (req, res) => {
   console.log(req.body);
-
   const params = {
     TableName: "job",
     Key: {
