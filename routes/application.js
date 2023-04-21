@@ -27,6 +27,7 @@ router.post("/sendApplicationJob", isAuthen, async (req, res) => {
       resume: { S: req.body.resume },
       transcript: { S: req.body.transcript },
       portfolio: { S: req.body.portfolio },
+      creation_date: {S: req.body.creation_date},
       state: { S: req.body.state },
     },
   };
@@ -65,6 +66,7 @@ router.post("/sendApplicationProgram", isAuthen, async (req, res) => {
       resume: { S: req.body.resume },
       transcript: { S: req.body.transcript },
       portfolio: { S: req.body.portfolio },
+      creation_date: {S: req.body.creation_date},
       state: { S: req.body.state },
     },
   };
@@ -79,101 +81,209 @@ router.post("/sendApplicationProgram", isAuthen, async (req, res) => {
       res.status(500).send(error.message);
     }
 });
-router.get("/getApplicantJob", async (req, res) => {
-  try {
-    console.log("test");
-    const items = await scanTable({ TableName: "ApplicationJob" });
-    console.log(items);
-    const ApplicationJob = items.map((item) => {
-      return {
-        id: item.id.S,
-        applicant_id: item.applicant_id.S,
-        company_name: item.company_name.S,
-        company_id: item.company_id.S,
-        job_name: item.job_name.S,
-        job_id: item.job_id.S,
-        firstName: item.firstName.S,
-        lastName: item.lastName.S,
-        email_profile: item.email_profile.S,
-        birthDate: item.birthDate.S,
-        gender: item.gender.S,
-        address: item.address.S,
-        phone: item.phone.S,
-        resume: item.resume.S,
-        transcript: item.transcript.S,
-        portfolio: item.portfolio.S,
-        state: item.state.S,
-      };
-    });
-    res.status(201).json({
-      items: ApplicationJob,
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
-  }
-});
-router.get("/getApplicantProgram", async (req, res) => {
-  try {
-    console.log("test");
-    const items = await scanTable({ TableName: "ApplicationProgram" });
-    console.log(items);
-    const ApplicationProgram = items.map((item) => {
-      return {
-        id: item.id.S,
-        applicant_id: item.applicant_id.S,
-        company_name: item.company_name.S,
-        company_id: item.company_id.S,
-        program_name: item.program_name.S,
-        program_id: item.program_id.S,
-        job_title: item.job_title.S,
-        firstName: item.firstName.S,
-        lastName: item.lastName.S,
-        email_profile: item.email_profile.S,
-        birthDate: item.birthDate.S,
-        gender: item.gender.S,
-        address: item.address.S,
-        phone: item.phone.S,
-        resume: item.resume.S,
-        transcript: item.transcript.S,
-        portfolio: item.portfolio.S,
-        state: item.state.S,
-      };
-    });
-    res.status(201).json({
-      items: ApplicationProgram,
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
-  }
-});
-router.get("/getApplicationJobById/:id", async (req, res) => {
-  try {
-    const applicants = await scanTable({ TableName: "applicant" });
 
-    const applicant_t = applicants.find((item) => item.id.S == req.params.id);
-    const applicant = {
-      id: applicant_t.id.S,
-      firstName: applicant_t.firstName.S,
-      lastName: applicant_t.lastName.S,
-      email_profile: applicant_t.email_profile.S,
-      birthDate: applicant_t.birthDate.S,
-      gender: applicant_t.gender.S,
-      address: applicant_t.address.S,
-      phone: applicant_t.phone.S,
-      resume: applicant_t.resume.S,
-      transcript: applicant_t.transcript.S,
-      portfolio: applicant_t.portfolio.S,
-      state: applicant_t.state.S,
-    };
-    res.status(201).json({
-      applicant: applicant,
-    });
+//Kong: คืออะไร
+
+// router.get("/getApplicantJob", async (req, res) => {
+//   try {
+//     console.log("test");
+//     const items = await scanTable({ TableName: "ApplicationJob" });
+//     console.log(items);
+//     const ApplicationJob = items.map((item) => {
+//       return {
+//         id: item.id.S,
+//         applicant_id: item.applicant_id.S,
+//         company_name: item.company_name.S,
+//         company_id: item.company_id.S,
+//         job_name: item.job_name.S,
+//         job_id: item.job_id.S,
+//         firstName: item.firstName.S,
+//         lastName: item.lastName.S,
+//         email_profile: item.email_profile.S,
+//         birthDate: item.birthDate.S,
+//         gender: item.gender.S,
+//         address: item.address.S,
+//         phone: item.phone.S,
+//         resume: item.resume.S,
+//         transcript: item.transcript.S,
+//         portfolio: item.portfolio.S,
+//         state: item.state.S,
+//       };
+//     });
+//     res.status(201).json({
+//       items: ApplicationJob,
+//     });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ message: "Server error" });
+//   }
+// });
+// router.get("/getApplicantProgram", async (req, res) => {
+//   try {
+//     console.log("test");
+//     const items = await scanTable({ TableName: "ApplicationProgram" });
+//     console.log(items);
+//     const ApplicationProgram = items.map((item) => {
+//       return {
+//         id: item.id.S,
+//         applicant_id: item.applicant_id.S,
+//         company_name: item.company_name.S,
+//         company_id: item.company_id.S,
+//         program_name: item.program_name.S,
+//         program_id: item.program_id.S,
+//         job_title: item.job_title.S,
+//         firstName: item.firstName.S,
+//         lastName: item.lastName.S,
+//         email_profile: item.email_profile.S,
+//         birthDate: item.birthDate.S,
+//         gender: item.gender.S,
+//         address: item.address.S,
+//         phone: item.phone.S,
+//         resume: item.resume.S,
+//         transcript: item.transcript.S,
+//         portfolio: item.portfolio.S,
+//         state: item.state.S,
+//       };
+//     });
+//     res.status(201).json({
+//       items: ApplicationProgram,
+//     });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ message: "Server error" });
+//   }
+// });
+
+router.get("/getApplicationJobsByApplicantId/:id", isAuthen, async (req, res) => {
+  console.log(req.params.id)
+  try {
+    const applicationJobs = await scanTable({ TableName: "ApplicationJob" });
+    const myApplicationJobs_t = applicationJobs.filter((item) => item.applicant_id.S == req.params.id);
+
+   const myApplicationJobs = myApplicationJobs_t.map((item)=>{
+    return {
+      id: item.id.S,
+      applicant_id: item.applicant_id.S,
+      company_id: item.company_id.S,
+      company_name: item.company_name.S,
+      job_name: item.job_name.S,
+      job_id: item.job_id.S,
+      firstName: item.firstName.S,
+      lastName: item.lastName.S,
+      email_profile: item.email_profile.S,
+      birthDate: item.birthDate.S,
+      gender: item.gender.S,
+      address: item.address.S,
+      phone: item.phone.S,
+      resume: item.phone.S,
+      transcript: item.transcript.S,
+      portfolio: item.portfolio.S,
+      creation_date: item.creation_date.S,
+      state: item.state.S,
+      }
+   })
+
+    res.status(201).json(myApplicationJobs);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
   }
 });
+
+router.get("/getApplicationProgramsByApplicantId/:id", isAuthen, async (req, res) => {
+  console.log(req.params.id)
+  try {
+    const applicationPrograms = await scanTable({ TableName: "ApplicationProgram" });
+    const myApplicationPrograms_t = applicationPrograms.filter((item) => item.applicant_id.S == req.params.id);
+
+   const myApplicationPrograms = myApplicationPrograms_t.map((item)=>{
+    return  {
+      id: item.id.S,
+      applicant_id: item.applicant_id.S,
+      company_id: item.company_id.S,
+      company_name: item.company_name.S,
+      program_id: item.program_id.S,
+      program_name: item.program_name.S,
+      job_title: item.job_title.S,
+      firstName: item.firstName.S,
+      lastName: item.lastName.S,
+      email_profile: item.email_profile.S,
+      birthDate: item.birthDate.S,
+      gender: item.gender.S,
+      address: item.address.S,
+      phone: item.phone.S,
+      resume: item.resume.S,
+      transcript: item.transcript.S,
+      portfolio: item.portfolio.S,
+      creation_date: item.creation_date.S,
+      state: item.state.S,
+    }
+   })
+
+    res.status(201).json(myApplicationPrograms);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+
+router.post("/setApplicationJobState",isAuthen, async (req, res) => {
+  console.log(req.body);
+  const params = {
+    TableName: "ApplicationJob",
+    Key: {
+      id: { S: req.body.id },
+    },
+    UpdateExpression: "SET #s = :val1",
+    ExpressionAttributeValues: {
+      ":val1": { S: req.body.state },
+    },
+    ExpressionAttributeNames: {
+      "#s": "state",
+    },
+    ReturnValues: "ALL_NEW",
+  };
+
+  try {
+    await updateItem(params);
+    res.status(201).json({
+      message: "updateState successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send(error.message);
+  }
+})
+
+router.post("/setApplicationProgramState",isAuthen, async (req, res) => {
+  console.log(req.body);
+  const params = {
+    TableName: "ApplicationProgram",
+    Key: {
+      id: { S: req.body.id },
+    },
+    UpdateExpression: "SET #s = :val1",
+    ExpressionAttributeValues: {
+      ":val1": { S: req.body.state },
+    },
+    ExpressionAttributeNames: {
+      "#s": "state",
+    },
+    ReturnValues: "ALL_NEW",
+  };
+
+  try {
+    await updateItem(params);
+    res.status(201).json({
+      message: "updateState successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send(error.message);
+  }
+})
+
+
 
 module.exports = router;
