@@ -209,7 +209,7 @@ router.post("/addJob", async (req, res) => {
   console.log(req.body)
   try {
     
-    const qualifications_arr = req.body.qualifications.split(',').map(item => item.trim())
+    // const qualifications_arr = req.body.qualifications.split(',').map(item => item.trim())
     const params = {
       TableName: "job",
       Item: {
@@ -231,7 +231,7 @@ router.post("/addJob", async (req, res) => {
           },
         },
         qualifications: {
-          SS: qualifications_arr,
+          SS: req.body.qualifications,
         },
         state: { S: req.body.state },
       },
