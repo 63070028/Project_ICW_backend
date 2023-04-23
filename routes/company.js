@@ -171,19 +171,16 @@ router.post("/editJob", async (req, res) => {
         id: { S: req.body.id },
       },
       UpdateExpression:
-        "SET #n = :name, #c = :capacity, #l = :location, detail = :detail, interview = :interview, salary_per_day = :salary_per_day, #s = :state, qualifications = :qualifications",
+        "SET #n = :name, #c = :capacity, #l = :location, detail = :detail, interview = :interview, salary_per_day = :salary_per_day, #s = :state, qualifications = :q",
       ExpressionAttributeValues: {
         ":name": { S: req.body.name },
-        ":capacity": { N: req.body.capacity.toString()  },
+        ":capacity": { N: req.body.capacity.toString() },
         ":location": { S: req.body.location },
         ":detail": { S: req.body.detail },
         ":interview": { S: req.body.interview },
-        ":salary_per_day": { N: req.body.salary_per_day.toString()  },
+        ":salary_per_day": { N: req.body.salary_per_day.toString() },
         ":state": { S: req.body.state },
-        ":qualifications": {
-          SS:
-            req.body.qualifications
-        }, // Check if array is not empty
+        ":q": { SS: req.body.qualifications.filter((value, index, self) => self.indexOf(value) === index) },
       },
       ExpressionAttributeNames: {
         "#s": "state",
@@ -231,8 +228,7 @@ router.post("/addJob", async (req, res) => {
           },
         },
         qualifications: {
-          SS: req.body.qualifications,
-        },
+          SS:req.body.qualifications,},
         state: { S: req.body.state },
       },
     };
