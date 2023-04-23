@@ -174,11 +174,11 @@ router.post("/editJob", async (req, res) => {
         "SET #n = :name, #c = :capacity, #l = :location, detail = :detail, interview = :interview, salary_per_day = :salary_per_day, #s = :state, qualifications = :qualifications",
       ExpressionAttributeValues: {
         ":name": { S: req.body.name },
-        ":capacity": { N: req.body.capacity.toString()  },
+        ":capacity": { N: req.body.capacity  },
         ":location": { S: req.body.location },
         ":detail": { S: req.body.detail },
         ":interview": { S: req.body.interview },
-        ":salary_per_day": { N: req.body.salary_per_day.toString()  },
+        ":salary_per_day": { N: req.body.salary_per_day },
         ":state": { S: req.body.state },
         ":qualifications": {
           SS:
