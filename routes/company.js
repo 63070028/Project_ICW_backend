@@ -214,6 +214,7 @@ router.post("/editJob", async (req, res) => {
 });
 //addJob
 router.post("/addJob", async (req, res) => {
+  console.log(req.body)
   try {
     const params = {
       TableName: "job",
@@ -261,7 +262,7 @@ router.get("/getProgram/:id", async (req, res) => {
     const items = await scanTable({ TableName: "program" });
 
     const program = items.find((item) => item.id.S === req.params.id);
-    
+
     const result = {
       id: program.id.S,
       company_id: program.company_id.S,
@@ -276,8 +277,9 @@ router.get("/getProgram/:id", async (req, res) => {
       state: program.state.S,
     };
 
-    res.status(200).json({ 
-      program: result });
+    res.status(200).json({
+      program: result,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
@@ -354,6 +356,5 @@ router.post("/setJobState", async (req, res) => {
     res.status(500).send(error.message);
   }
 });
-
 
 module.exports = router;
