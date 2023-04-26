@@ -241,6 +241,7 @@ router.post("/addJob", async (req, res) => {
     await putItem(params);
     res.status(201).json({
       message: "Job added successfully",
+      job_id: params.Item.id.S
     });
   } catch (error) {
     console.error(error);
@@ -410,6 +411,7 @@ router.post("/addProgram", upload.single("image"), async (req, res) => {
     
     res.status(201).json({
       image:imageUrl,
+      program_id:params.Item.id.S,
       message: "Program added successfully",
     });
   } catch (error) {
