@@ -211,7 +211,7 @@ router.post("/addJob", async (req, res) => {
   console.log(req.body)
   try {
     
-    // const qualifications_arr = req.body.qualifications.split(',').map(item => item.trim())
+    // const qualifications_arr = req.body.qualifications
     const params = {
       TableName: "job",
       Item: {
@@ -386,9 +386,10 @@ router.post("/addProgram", upload.single("image"), async (req, res) => {
       folderS3,
       req.file
     );
-    const jobs_title_arr = req.body.jobs_title.split(',').map(item => item.trim());
-    const qualifications_arr = req.body.qualifications.split(',').map(item => item.trim());
-    const privileges_arr = req.body.privileges.split(',').map(item => item.trim());
+    const jobs_title_arr = JSON.parse(req.body.jobs_title);
+    const qualifications_arr = JSON.parse(req.body.qualifications);
+    const privileges_arr = JSON.parse(req.body.privileges);
+
     console.log("all", req.body)
     const params = {
       TableName: "program",
@@ -431,9 +432,13 @@ router.post("/editProgram", upload.single("image"), async (req, res) => {
       folderS3,
       req.file
     );
-    const jobs_title_arr = req.body.jobs_title.split(",").map((item) => item.trim());
-    const qualifications_arr = req.body.qualifications.split(",").map((item) => item.trim());
-    const privileges_arr = req.body.privileges.split(",").map((item) => item.trim());
+
+    // const jobs_title_arr = req.body.jobs_title.split(",").map((item) => item.trim());
+    // const qualifications_arr = req.body.qualifications.split(",").map((item) => item.trim());
+    // const privileges_arr = req.body.privileges.split(",").map((item) => item.trim());
+    const jobs_title_arr = JSON.parse(req.body.jobs_title);
+    const qualifications_arr = JSON.parse(req.body.qualifications);
+    const privileges_arr = JSON.parse(req.body.privileges);
 
     const params = {
       TableName: "program",
@@ -488,6 +493,7 @@ router.post("/getProgramById", async (req, res) => {
       privileges: program_t.privileges.SS,
       state: program_t.state.S,
     };
+
 
     res.status(201).json({
       program: program,
