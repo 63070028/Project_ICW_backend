@@ -28,6 +28,7 @@ router.get("/getReportJob", async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+
 router.get("/getCompany", async (req, res) => {
   try {
     console.log("test");
