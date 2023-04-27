@@ -82,7 +82,7 @@ router.post("/sendApplicationProgram", isAuthen, async (req, res) => {
     }
 });
 
-router.get("/getApplicationJobsByCompanyId/:id", isAuthen, async (req, res) => {
+router.get("/getApplicationJobsByCompanyId/:id",  async (req, res) => {
   console.log(req.params.id)
   try {
     const applicationJobs = await scanTable({ TableName: "ApplicationJob" });
@@ -118,7 +118,7 @@ router.get("/getApplicationJobsByCompanyId/:id", isAuthen, async (req, res) => {
   }
 });
 
-router.get("/getApplicationProgramsByCompanyId/:id", isAuthen, async (req, res) => {
+router.get("/getApplicationProgramsByCompanyId/:id",  async (req, res) => {
   console.log(req.params.id)
   try {
     const applicationPrograms = await scanTable({ TableName: "ApplicationProgram" });
@@ -155,7 +155,7 @@ router.get("/getApplicationProgramsByCompanyId/:id", isAuthen, async (req, res) 
   }
 });
 
-router.get("/getApplicationJobsByApplicantId/:id", isAuthen, async (req, res) => {
+router.get("/getApplicationJobsByApplicantId/:id", async (req, res) => {
   console.log(req.params.id)
   try {
     const applicationJobs = await scanTable({ TableName: "ApplicationJob" });
@@ -191,7 +191,7 @@ router.get("/getApplicationJobsByApplicantId/:id", isAuthen, async (req, res) =>
   }
 });
 
-router.get("/getApplicationProgramsByApplicantId/:id", isAuthen, async (req, res) => {
+router.get("/getApplicationProgramsByApplicantId/:id",  async (req, res) => {
   console.log(req.params.id)
   try {
     const applicationPrograms = await scanTable({ TableName: "ApplicationProgram" });
@@ -228,7 +228,7 @@ router.get("/getApplicationProgramsByApplicantId/:id", isAuthen, async (req, res
 });
 
 
-router.post("/setApplicationJobState",isAuthen, async (req, res) => {
+router.post("/setApplicationJobState", isAuthen, async (req, res) => {
   console.log(req.body);
   const params = {
     TableName: "ApplicationJob",
@@ -256,7 +256,7 @@ router.post("/setApplicationJobState",isAuthen, async (req, res) => {
   }
 })
 
-router.post("/setApplicationProgramState",isAuthen, async (req, res) => {
+router.post("/setApplicationProgramState", isAuthen, async (req, res) => {
   console.log(req.body);
   const params = {
     TableName: "ApplicationProgram",
@@ -319,7 +319,7 @@ router.get("/getApplicationJobDetailById/:id", async (req, res) => {
   }
 });
 
-router.post("/acceptApplicationJob",  async (req, res) => {
+router.post("/acceptApplicationJob", isAuthen, async (req, res) => {
   console.log(req.body)
 
   const params = {
@@ -350,7 +350,7 @@ router.post("/acceptApplicationJob",  async (req, res) => {
   }
 });
 
-router.post("/declineApplicationJob",  async (req, res) => {
+router.post("/declineApplicationJob", isAuthen, async (req, res) => {
   console.log(req.body)
 
   const params = {
@@ -417,7 +417,7 @@ router.get("/getApplicationProgramDetailById/:id", async (req, res) => {
   }
 });
 
-router.post("/acceptApplicationProgram",  async (req, res) => {
+router.post("/acceptApplicationProgram", isAuthen, async (req, res) => {
   console.log(req.body)
 
   const params = {
@@ -448,7 +448,7 @@ router.post("/acceptApplicationProgram",  async (req, res) => {
   }
 });
 
-router.post("/declineApplicationProgram",  async (req, res) => {
+router.post("/declineApplicationProgram", isAuthen, async (req, res) => {
   console.log(req.body)
 
   const params = {

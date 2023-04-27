@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const isAuthen = require("../middleware/isAuthen");
 
-const { scanTable, putItem, updateItem } = require("../dynamodb");
+const { scanTable, updateItem } = require("../dynamodb");
 
 router.get("/getReportJob", async (req, res) => {
   try {
@@ -85,7 +85,7 @@ router.get("/getCompanyJobByCompanyId/:id", async (req, res) => {
   }
 });
 
-router.post("/changeJobState",  async (req, res) => {
+router.post("/changeJobState", isAuthen, async (req, res) => {
   console.log(req.body)
 
   const params = {

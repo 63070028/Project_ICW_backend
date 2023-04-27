@@ -10,7 +10,6 @@ const { putItem, scanTable, updateItem, deleteItem } = require("../dynamodb");
 const isAuthen = require("../middleware/isAuthen");
 
 router.post("/signUp", async (req, res) => {
-  //database
   console.log(req.body);
 
   const params = {
@@ -44,7 +43,7 @@ router.post("/signUp", async (req, res) => {
   }
 });
 
-router.get("/getProfileById/:id", isAuthen, async (req, res) => {
+router.get("/getProfileById/:id",  async (req, res) => {
   try {
     const applicants = await scanTable({ TableName: "applicant" });
 
