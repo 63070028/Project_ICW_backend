@@ -45,7 +45,7 @@ router.post("/sendApplicationJob", isAuthen, async (req, res) => {
 
 router.post("/sendApplicationProgram", isAuthen, async (req, res) => {
   console.log(req.body);
-
+  console.log(req.body);
   const params = {
     TableName: "ApplicationProgram",
     Item: {
@@ -82,8 +82,6 @@ router.post("/sendApplicationProgram", isAuthen, async (req, res) => {
     }
 });
 
-//Kong: แก้ขื่อ + fitter company_id
-
 router.get("/getApplicationJobsByCompanyId/:id", isAuthen, async (req, res) => {
   console.log(req.params.id)
   try {
@@ -108,7 +106,7 @@ router.get("/getApplicationJobsByCompanyId/:id", isAuthen, async (req, res) => {
       resume: item.phone.S,
       transcript: item.transcript.S,
       portfolio: item.portfolio.S,
-      creation_date: item.creation_date,
+      creation_date: item.creation_date.S,
       state: item.state.S,
       }
    })
@@ -145,7 +143,7 @@ router.get("/getApplicationProgramsByCompanyId/:id", isAuthen, async (req, res) 
       resume: item.resume.S,
       transcript: item.transcript.S,
       portfolio: item.portfolio.S,
-      creation_date: item.creation_date,
+      creation_date: item.creation_date.S,
       state: item.state.S,
     }
    })
@@ -198,7 +196,6 @@ router.get("/getApplicationProgramsByApplicantId/:id", isAuthen, async (req, res
   try {
     const applicationPrograms = await scanTable({ TableName: "ApplicationProgram" });
     const myApplicationPrograms_t = applicationPrograms.filter((item) => item.applicant_id.S == req.params.id);
-
    const myApplicationPrograms = myApplicationPrograms_t.map((item)=>{
     return  {
       id: item.id.S,
@@ -287,6 +284,199 @@ router.post("/setApplicationProgramState",isAuthen, async (req, res) => {
   }
 })
 
+router.get("/getApplicationJobDetailById/:id", async (req, res) => {
+  try {
+    console.log(req.params.id)
+    const applicationJobs = await scanTable({ TableName: "ApplicationJob" });
+    const myApplicationJobs_t = applicationJobs.find((item) => item.id.S == req.params.id);
+    const myApplicationJobs = {
+      id: myApplicationJobs_t.id.S,
+      applicant_id: myApplicationJobs_t.applicant_id.S,
+      company_id: myApplicationJobs_t.company_id.S,
+      company_name: myApplicationJobs_t.company_name.S,
+      job_name: myApplicationJobs_t.job_name.S,
+      job_id: myApplicationJobs_t.job_id.S,
+      firstName: myApplicationJobs_t.firstName.S,
+      lastName: myApplicationJobs_t.lastName.S,
+      email_profile: myApplicationJobs_t.email_profile.S,
+      birthDate: myApplicationJobs_t.birthDate.S,
+      gender: myApplicationJobs_t.gender.S,
+      address: myApplicationJobs_t.address.S,
+      phone: myApplicationJobs_t.phone.S,
+      resume: myApplicationJobs_t.phone.S,
+      transcript: myApplicationJobs_t.transcript.S,
+      portfolio: myApplicationJobs_t.portfolio.S,
+      creation_date: myApplicationJobs_t.creation_date,
+      state: myApplicationJobs_t.state.S,
+    }
+   console.log(myApplicationJobs)
+   res.status(201).json({
+    applicantJob: myApplicationJobs,
+  });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
 
+router.post("/acceptApplicationJob",  async (req, res) => {
+  console.log(req.body)
+
+  const params = {
+    TableName: "ApplicationJob",
+    Key: {
+      "id": { "S":  req.body.id }
+    },
+    UpdateExpression: "SET #s = :val8",
+    ExpressionAttributeValues: {
+      ":val8": { "S":  req.body.state },
+
+    },
+    ExpressionAttributeNames: {
+      "#s": "state"
+    },  
+    ReturnValues: "ALL_NEW"
+  };
+
+
+  try {
+    await updateItem(params);
+    res.status(201).json({
+      message: "updateState successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send(error.message);
+  }
+});
+
+router.post("/declineApplicationJob",  async (req, res) => {
+  console.log(req.body)
+
+  const params = {
+    TableName: "ApplicationJob",
+    Key: {
+      "id": { "S":  req.body.id }
+    },
+    UpdateExpression: "SET #s = :val8",
+    ExpressionAttributeValues: {
+      ":val8": { "S":  req.body.state },
+
+    },
+    ExpressionAttributeNames: {
+      "#s": "state"
+    },  
+    ReturnValues: "ALL_NEW"
+  };
+
+
+  try {
+    await updateItem(params);
+    res.status(201).json({
+      message: "updateState successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send(error.message);
+  }
+});
+
+router.get("/getApplicationProgramDetailById/:id", async (req, res) => {
+  try {
+    console.log(req.params.id)
+    const applicationPrograms = await scanTable({ TableName: "ApplicationProgram" });
+    const myApplicationPrograms_t = applicationPrograms.find((item) => item.id.S == req.params.id);
+    const myApplicationPrograms = {
+      id: myApplicationPrograms_t.id.S,
+      applicant_id: myApplicationPrograms_t.applicant_id.S,
+      company_id: myApplicationPrograms_t.company_id.S,
+      company_name: myApplicationPrograms_t.company_name.S,
+      program_id: myApplicationPrograms_t.program_id.S,
+      program_name: myApplicationPrograms_t.program_name.S,
+      job_title: myApplicationPrograms_t.job_title.S,
+      firstName: myApplicationPrograms_t.firstName.S,
+      lastName: myApplicationPrograms_t.lastName.S,
+      email_profile: myApplicationPrograms_t.email_profile.S,
+      birthDate: myApplicationPrograms_t.birthDate.S,
+      gender: myApplicationPrograms_t.gender.S,
+      address: myApplicationPrograms_t.address.S,
+      phone: myApplicationPrograms_t.phone.S,
+      resume: myApplicationPrograms_t.resume.S,
+      transcript: myApplicationPrograms_t.transcript.S,
+      portfolio: myApplicationPrograms_t.portfolio.S,
+      creation_date: myApplicationPrograms_t.creation_date.S,
+      state: myApplicationPrograms_t.state.S,
+    }
+   console.log(myApplicationPrograms)
+   res.status(201).json({
+    applicantProgram: myApplicationPrograms,
+  });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+router.post("/acceptApplicationProgram",  async (req, res) => {
+  console.log(req.body)
+
+  const params = {
+    TableName: "ApplicationProgram",
+    Key: {
+      "id": { "S":  req.body.id }
+    },
+    UpdateExpression: "SET #s = :val8",
+    ExpressionAttributeValues: {
+      ":val8": { "S":  req.body.state },
+
+    },
+    ExpressionAttributeNames: {
+      "#s": "state"
+    },  
+    ReturnValues: "ALL_NEW"
+  };
+
+
+  try {
+    await updateItem(params);
+    res.status(201).json({
+      message: "updateState successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send(error.message);
+  }
+});
+
+router.post("/declineApplicationProgram",  async (req, res) => {
+  console.log(req.body)
+
+  const params = {
+    TableName: "ApplicationProgram",
+    Key: {
+      "id": { "S":  req.body.id }
+    },
+    UpdateExpression: "SET #s = :val8",
+    ExpressionAttributeValues: {
+      ":val8": { "S":  req.body.state },
+
+    },
+    ExpressionAttributeNames: {
+      "#s": "state"
+    },  
+    ReturnValues: "ALL_NEW"
+  };
+
+
+  try {
+    await updateItem(params);
+    res.status(201).json({
+      message: "updateState successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send(error.message);
+  }
+});
 
 module.exports = router;

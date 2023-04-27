@@ -53,13 +53,13 @@ router.get("/getCompany", async (req, res) => {
   }
 });
 
-router.get("/getCompanyJob", async (req, res) => {
+router.get("/getCompanyJobByCompanyId/:id", async (req, res) => {
   try {
-    console.log("test");
-    const items = await scanTable({ TableName: "job" });
-    console.log(items);
+    console.log(req.params.id);
+    const Jobs = await scanTable({ TableName: "job" });
+    const companyJobs_t = Jobs.filter((item) => item.company_id.S == req.params.id);
 
-    const Job = items.map((item) => {
+    const companyJobs = companyJobs_t.map((item) => {
       return {
         id: item.id.S,
         company_id: item.company_id.S,
@@ -76,7 +76,7 @@ router.get("/getCompanyJob", async (req, res) => {
       };
     });
     res.status(201).json({
-      items: Job,
+      items: companyJobs,
     });
   } catch (error) {
     console.error(error);
@@ -84,7 +84,36 @@ router.get("/getCompanyJob", async (req, res) => {
   }
 });
 
+router.post("/changeJobState",  async (req, res) => {
+  console.log(req.body)
 
+  const params = {
+    TableName: "job",
+    Key: {
+      "id": { "S":  req.body.id }
+    },
+    UpdateExpression: "SET #s = :val8",
+    ExpressionAttributeValues: {
+      ":val8": { "S":  req.body.state },
+
+    },
+    ExpressionAttributeNames: {
+      "#s": "state"
+    },  
+    ReturnValues: "ALL_NEW"
+  };
+
+
+  try {
+    await updateItem(params);
+    res.status(201).json({
+      message: "updateState successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send(error.message);
+  }
+});
 
 
 module.exports = router;
