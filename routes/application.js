@@ -303,7 +303,7 @@ router.get("/getApplicationJobDetailById/:id", async (req, res) => {
       gender: myApplicationJobs_t.gender.S,
       address: myApplicationJobs_t.address.S,
       phone: myApplicationJobs_t.phone.S,
-      resume: myApplicationJobs_t.phone.S,
+      resume: myApplicationJobs_t.resume.S,
       transcript: myApplicationJobs_t.transcript.S,
       portfolio: myApplicationJobs_t.portfolio.S,
       creation_date: myApplicationJobs_t.creation_date,
