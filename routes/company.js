@@ -432,10 +432,6 @@ router.post("/editProgram", upload.single("image"), async (req, res) => {
       folderS3,
       req.file
     );
-
-    // const jobs_title_arr = req.body.jobs_title.split(",").map((item) => item.trim());
-    // const qualifications_arr = req.body.qualifications.split(",").map((item) => item.trim());
-    // const privileges_arr = req.body.privileges.split(",").map((item) => item.trim());
     const jobs_title_arr = JSON.parse(req.body.jobs_title);
     const qualifications_arr = JSON.parse(req.body.qualifications);
     const privileges_arr = JSON.parse(req.body.privileges);
@@ -552,7 +548,6 @@ router.post("/setProgramState", async (req, res) => {
     res.status(500).send(error.message);
   }
 });
-
 
 router.get("/getCompanyStateon", async (req, res) => {
   try {
