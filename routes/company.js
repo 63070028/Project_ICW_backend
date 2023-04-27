@@ -40,6 +40,7 @@ router.post("/edit",upload.fields([{ name: "profile_image", maxCount: 1 },{ name
   async (req, res) => {
     const profileImageFile = req.files["profile_image"]?.[0];
     const backgroundImageFile = req.files["background_image"]?.[0];
+
     try {
       const fileNameProfileImage = `${req.body.id}-${uuidv4()}-${
         profileImageFile.originalname
@@ -63,7 +64,10 @@ router.post("/edit",upload.fields([{ name: "profile_image", maxCount: 1 },{ name
         folderBackgroundS3,
         backgroundImageFile
       );
+
       console.log("Background image uploaded to:", backgroundImageUrl);
+
+      console.log(req.body)
 
       const params = {
         TableName: "company",
@@ -74,9 +78,9 @@ router.post("/edit",upload.fields([{ name: "profile_image", maxCount: 1 },{ name
           "SET #n = :val1,  description = :val2, profile_image = :val3, background_image = :val4, video_iframe = :val5, #s = :val8",
         ExpressionAttributeValues: {
           ":val1": { S: req.body.name },
-          ":val2": { S: req.body.description },
-          ":val3": { S: profileImageUrl },
-          ":val4": { S: backgroundImageUrl },
+          ":val2": { S: req.body.description},
+          ":val3": { S: profileImageUrl},
+          ":val4": { S: backgroundImageUrl},
           ":val5": { S: req.body.video_iframe },
           ":val8": { S: req.body.state },
         },
@@ -86,6 +90,7 @@ router.post("/edit",upload.fields([{ name: "profile_image", maxCount: 1 },{ name
         },
         ReturnValues: "ALL_NEW",
       };
+
       await updateItem(params);
       res.status(201).json({
         message: "Company profile updated successfully",
@@ -174,7 +179,7 @@ router.post("/editJob", async (req, res) => {
         "SET #n = :name, #c = :capacity, #l = :location, detail = :detail, interview = :interview, salary_per_day = :salary_per_day, #s = :state, qualifications = :q",
       ExpressionAttributeValues: {
         ":name": { S: req.body.name },
-        ":capacity": { N: req.body.capacity.toString() },
+        ":capacity": { N: req.body.capacity.toString()},
         ":location": { S: req.body.location },
         ":detail": { S: req.body.detail },
         ":interview": { S: req.body.interview },
@@ -206,6 +211,7 @@ router.post("/addJob", async (req, res) => {
   console.log(req.body)
   try {
     
+    // const qualifications_arr = req.body.qualifications
     const params = {
       TableName: "job",
       Item: {
@@ -235,6 +241,7 @@ router.post("/addJob", async (req, res) => {
     await putItem(params);
     res.status(201).json({
       message: "Job added successfully",
+      job_id: params.Item.id.S
     });
   } catch (error) {
     console.error(error);
@@ -379,9 +386,10 @@ router.post("/addProgram", upload.single("image"), async (req, res) => {
       folderS3,
       req.file
     );
-    const jobs_title_arr = req.body.jobs_title.split(',').map(item => item.trim());
-    const qualifications_arr = req.body.qualifications.split(',').map(item => item.trim());
-    const privileges_arr = req.body.privileges.split(',').map(item => item.trim());
+    const jobs_title_arr = JSON.parse(req.body.jobs_title);
+    const qualifications_arr = JSON.parse(req.body.qualifications);
+    const privileges_arr = JSON.parse(req.body.privileges);
+
     console.log("all", req.body)
     const params = {
       TableName: "program",
@@ -404,6 +412,7 @@ router.post("/addProgram", upload.single("image"), async (req, res) => {
     
     res.status(201).json({
       image:imageUrl,
+      program_id:params.Item.id.S,
       message: "Program added successfully",
     });
   } catch (error) {
@@ -423,9 +432,13 @@ router.post("/editProgram", upload.single("image"), async (req, res) => {
       folderS3,
       req.file
     );
-    const jobs_title_arr = req.body.jobs_title.split(",").map((item) => item.trim());
-    const qualifications_arr = req.body.qualifications.split(",").map((item) => item.trim());
-    const privileges_arr = req.body.privileges.split(",").map((item) => item.trim());
+
+    // const jobs_title_arr = req.body.jobs_title.split(",").map((item) => item.trim());
+    // const qualifications_arr = req.body.qualifications.split(",").map((item) => item.trim());
+    // const privileges_arr = req.body.privileges.split(",").map((item) => item.trim());
+    const jobs_title_arr = JSON.parse(req.body.jobs_title);
+    const qualifications_arr = JSON.parse(req.body.qualifications);
+    const privileges_arr = JSON.parse(req.body.privileges);
 
     const params = {
       TableName: "program",
@@ -480,6 +493,7 @@ router.post("/getProgramById", async (req, res) => {
       privileges: program_t.privileges.SS,
       state: program_t.state.S,
     };
+
 
     res.status(201).json({
       program: program,
@@ -538,5 +552,59 @@ router.post("/setProgramState", async (req, res) => {
     res.status(500).send(error.message);
   }
 });
+
+
+router.get("/getCompanyStateon", async (req, res) => {
+  try {
+    const items = await scanTable({ TableName: "company" });
+    console.log(items);
+    const company_all = items.map((item) => {
+      return {
+        id: item.id.S,
+        name: item.name.S,
+        description: item.description.S,
+        profile_image: item.profile_image.S,
+        background_image: item.background_image.S,
+        video_iframe: item.video_iframe.S,
+        state: item.state.S,
+      };
+    });
+
+    const conpany_state_on = company_all.filter(company =>  company.state === 'on')
+    console.log(conpany_state_on)
+    res.status(201).json(conpany_state_on);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+
+router.get("/getProgram", async (req, res) => {
+  try {
+    const items = await scanTable({ TableName: "program" });
+    const program = items.map(program_t => {
+      return {
+        id: program_t.id.S,
+        company_id: program_t.company_id.S,
+        company_name: program_t.company_name.S,
+        image: program_t.image.S,
+        name: program_t.name.S,
+        description: program_t.description.S,
+        course: program_t.course.S,
+        jobs_title: program_t.jobs_title.SS,
+        qualifications: program_t.qualifications.SS,
+        privileges: program_t.privileges.SS,
+        state: program_t.state.S,
+      };
+    })
+
+    res.status(201).json(program);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 
 module.exports = router;
