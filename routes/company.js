@@ -3,7 +3,6 @@ const router = express.Router();
 const { v4: uuidv4 } = require("uuid");
 const { putItem, scanTable, updateItem, deleteItem } = require("../dynamodb");
 const { uploadToS3 } = require("../s3");
-const isAuthen = require("../middleware/isAuthen");
 const multer = require("multer");
 const upload = multer();
 
@@ -37,7 +36,6 @@ router.post("/signUp", async (req, res) => {
 
 router.post("/edit",upload.fields([{ name: "profile_image", maxCount: 1 },{ name: "background_image", maxCount: 1 },
 ]),
-isAuthen,
   async (req, res) => {
     const profileImageFile = req.files["profile_image"]?.[0];
     const backgroundImageFile = req.files["background_image"]?.[0];
@@ -169,7 +167,7 @@ router.get("/getJob/:id", async (req, res) => {
 });
 
 //editCompanyJob
-router.post("/editJob", isAuthen, async (req, res) => {
+router.post("/editJob", async (req, res) => {
   try {
     const params = {
       TableName: "job",
@@ -208,7 +206,7 @@ router.post("/editJob", isAuthen, async (req, res) => {
 });
 
 //AddJob
-router.post("/addJob", isAuthen, async (req, res) => {
+router.post("/addJob", async (req, res) => {
   console.log(req.body)
   try {
     
@@ -252,7 +250,7 @@ router.post("/addJob", isAuthen, async (req, res) => {
 
 
 // Delete a job
-router.delete("/deleteJob", isAuthen, async (req, res) => {
+router.delete("/deleteJob", async (req, res) => {
   const { jobId } = req.query;
 
   const params = {
@@ -317,7 +315,7 @@ router.post("/getJobById", async (req, res) => {
   }
 });
 
-router.post("/setJobState", isAuthen, async (req, res) => {
+router.post("/setJobState", async (req, res) => {
   console.log(req.body);
   const params = {
     TableName: "job",
@@ -377,7 +375,7 @@ router.get("/getProgram/:id", async (req, res) => {
 });
 
 //addProgram
-router.post("/addProgram", upload.single("image"), isAuthen, async (req, res) => {
+router.post("/addProgram", upload.single("image"), async (req, res) => {
   try {
     const fileName = `ProgramImage-${uuidv4()}-${req.file.originalname}`;
     const folderS3 = "images";
@@ -423,7 +421,7 @@ router.post("/addProgram", upload.single("image"), isAuthen, async (req, res) =>
 });
 
 //edit and update Program
-router.post("/editProgram", upload.single("image"), isAuthen, async (req, res) => {
+router.post("/editProgram", upload.single("image"), async (req, res) => {
   try {
     const fileName = `ProgramImage-${uuidv4()}-${req.file.originalname}`;
     const folderS3 = "images";
@@ -501,7 +499,7 @@ router.post("/getProgramById", async (req, res) => {
   }
 });
 
-router.delete("/deleteProgram", isAuthen, async (req, res) => {
+router.delete("/deleteProgram", async (req, res) => {
   const { programId } = req.query;
 
   const params = {
@@ -522,7 +520,7 @@ router.delete("/deleteProgram", isAuthen, async (req, res) => {
   }
 });
 
-router.post("/setProgramState", isAuthen, async (req, res) => {
+router.post("/setProgramState", async (req, res) => {
   console.log(req.body);
   const params = {
     TableName: "program",
