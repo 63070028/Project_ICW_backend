@@ -554,7 +554,7 @@ router.post("/setProgramState", async (req, res) => {
 });
 
 
-router.get("/getCompanyStateon", async (req, res) => {
+router.get("/getCompanyStateOn", async (req, res) => {
   try {
     const items = await scanTable({ TableName: "company" });
     console.log(items);
@@ -570,9 +570,10 @@ router.get("/getCompanyStateon", async (req, res) => {
       };
     });
 
-    const conpany_state_on = company_all.filter(company =>  company.state === 'on')
-    console.log(conpany_state_on)
-    res.status(201).json(conpany_state_on);
+    const company_state_on = company_all.filter(company =>  company.state === 'on')
+
+    console.log(company_state_on)
+    res.status(201).json(company_state_on);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
@@ -580,10 +581,10 @@ router.get("/getCompanyStateon", async (req, res) => {
 });
 
 
-router.get("/getProgram", async (req, res) => {
+router.get("/getProgramStateOn", async (req, res) => {
   try {
     const items = await scanTable({ TableName: "program" });
-    const program = items.map(program_t => {
+    const program_all = items.map(program_t => {
       return {
         id: program_t.id.S,
         company_id: program_t.company_id.S,
@@ -599,7 +600,47 @@ router.get("/getProgram", async (req, res) => {
       };
     })
 
-    res.status(201).json(program);
+    const program_state_on = program_all.filter(program =>  program.state === 'on')
+
+    res.status(201).json(program_state_on);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+router.get("/getJobByCompanyIdStateOn/:id", async (req, res) => {
+  try {
+    console.log("test");
+    const items = await scanTable({ TableName: "job" });
+
+    const job_all_t = items.filter((item) => item.company_id.S == req.params.id);
+
+    const job_all = job_all_t.map((item) => {
+      return {
+        id: item.id.S,
+        capacity: item.capacity.N,
+        company_name: item.company_name.S,
+        company_id: item.company_id.S,
+        creation_date: item.creation_date.S,
+        detail: item.detail.S,
+        interview: item.interview.S,
+        location: item.location.S,
+        name: item.name.S,
+        salary_per_day: item.salary_per_day.N,
+        contact: {
+          name: item.contact.M.name.S,
+          email: item.contact.M.email.S,
+          phone: item.contact.M.phone.S,
+        },
+        qualifications: item.qualifications.SS,
+        state: item.state.S,
+      };
+    });
+
+    const job_state_on = job_all.filter(job =>  job.state === 'on')
+
+    res.status(201).json(job_state_on);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
