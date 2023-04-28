@@ -218,7 +218,7 @@ router.post("/addJob", async (req, res) => {
         capacity: { N: req.body.capacity.toString() },
         company_name: { S: req.body.company_name },
         company_id: { S: req.body.company_id },
-        creation_date: { S: new Date().toISOString() },
+        creation_date: { S: req.body.creation_date },
         detail: { S: req.body.detail },
         interview: { S: req.body.interview },
         location: { S: req.body.location },
